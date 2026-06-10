@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  /* HousePass brand palette */
+  --color-ink: #0c1422;
+  --color-ink-800: #14202f;
+  --color-ink-700: #1d2c3f;
+  --color-ink-600: #2a3d55;
+  --color-teal: #16b6a6;
+  --color-teal-600: #119687;
+  --color-teal-700: #0d7a6e;
+  --color-mint: #7fe9d8;
+  --color-mint-100: #e3faf5;
+  --color-paper: #fbfcfe;
+  --color-alert: #de5b5b;
+  --color-alert-600: #c74545;
+  --color-alert-100: #fcecec;
+  --color-warn: #f3c969;
+
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px rgb(12 20 34 / 0.06), 0 8px 24px rgb(12 20 34 / 0.07);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2 {
+  font-family: var(--font-serif);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+}
