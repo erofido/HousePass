@@ -1,0 +1,3 @@
+# Minimal Supabase CLI config; `supabase link --project-ref <ref>` connects
+# this to your hosted project, then `supabase db push` applies ./migrations.
+project_id = "housepass"
