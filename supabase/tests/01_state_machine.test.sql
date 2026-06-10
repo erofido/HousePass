@@ -329,4 +329,31 @@ begin
     'manual corrections audited');
 end $$;
 
+-- ---------------------------------------------------------------------------
+-- 18. PIN lockout: 5 consecutive failures lock for 5 minutes; success resets
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  sam constant uuid := 'd1000000-0000-0000-0000-00000000000d';
+  fails integer;
+  locked timestamptz;
+begin
+  perform public.app_pin_attempt(array[sam], null);
+  perform public.app_pin_attempt(array[sam], null);
+  perform public.app_pin_attempt(array[sam], null);
+  perform public.app_pin_attempt(array[sam], null);
+
+  select failed_pin_attempts, locked_until into fails, locked from public.students where id = sam;
+  perform assert_true(fails = 4 and locked is null, 'four failures: counted, not locked');
+
+  perform public.app_pin_attempt(array[sam], null);
+  select failed_pin_attempts, locked_until into fails, locked from public.students where id = sam;
+  perform assert_true(locked > now() + interval '4 minutes', 'fifth failure locks ~5 minutes');
+  perform assert_true(fails = 0, 'counter resets when the lock lands');
+
+  perform public.app_pin_attempt(array[sam], sam);
+  select failed_pin_attempts, locked_until into fails, locked from public.students where id = sam;
+  perform assert_true(fails = 0 and locked is null, 'successful login clears the lock');
+end $$;
+
 select 'state machine tests passed' as result;
