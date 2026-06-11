@@ -10,7 +10,8 @@
     "test": "vitest run",
     "seed": "tsx scripts/seed.ts",
     "typecheck": "tsc --noEmit",
-    "test:db": "bash scripts/db-test.sh"
+    "test:db": "bash scripts/db-test.sh",
+    "icons": "node scripts/gen-icons.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

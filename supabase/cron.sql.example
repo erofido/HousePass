@@ -1,0 +1,40 @@
+-- Scheduling the HousePass background jobs with Supabase Cron (pg_cron +
+-- pg_net), entirely inside your Supabase project. Run this in the SQL
+-- editor AFTER replacing the two placeholders:
+--
+--   YOUR_APP_URL     e.g. https://housepass.vercel.app
+--   YOUR_CRON_SECRET the CRON_SECRET value from your Vercel env vars
+--
+-- (Alternatives: a GitHub Actions schedule or Vercel Cron hitting the same
+--  endpoints with the same Authorization header.)
+
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+-- Late alerts: every 5 minutes.
+select cron.schedule(
+  'housepass-late-alerts',
+  '*/5 * * * *',
+  $$
+  select net.http_post(
+    url     := 'YOUR_APP_URL/api/cron/late-alerts',
+    headers := jsonb_build_object('Authorization', 'Bearer YOUR_CRON_SECRET')
+  );
+  $$
+);
+
+-- Retention: daily at 04:10.
+select cron.schedule(
+  'housepass-retention',
+  '10 4 * * *',
+  $$
+  select net.http_post(
+    url     := 'YOUR_APP_URL/api/cron/retention',
+    headers := jsonb_build_object('Authorization', 'Bearer YOUR_CRON_SECRET')
+  );
+  $$
+);
+
+-- Inspect / remove:
+--   select * from cron.job;
+--   select cron.unschedule('housepass-late-alerts');
