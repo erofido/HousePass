@@ -11,7 +11,8 @@
     "seed": "tsx scripts/seed.ts",
     "typecheck": "tsc --noEmit",
     "test:db": "bash scripts/db-test.sh",
-    "icons": "node scripts/gen-icons.mjs"
+    "icons": "node scripts/gen-icons.mjs",
+    "migrations:bundle": "node scripts/bundle-migrations.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

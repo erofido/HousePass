@@ -59,6 +59,20 @@ staff ───────────┴─► supabase-js + RLS ◄─┘   �
 
 ## Getting started
 
+### Fastest path (no terminal needed)
+
+1. **Supabase**: create a project, open **SQL Editor → New query**, paste the
+   whole of [`supabase/all_migrations.sql`](supabase/all_migrations.sql) and
+   **Run** (one paste — it bundles all four migrations).
+2. **Vercel**: import this repo, add the environment variables from
+   `.env.example`, deploy.
+3. Open `https://<your-app>/api/setup?key=<your CRON_SECRET>` once. It seeds
+   the pilot house and shows the staff logins, student PINs and the iPad
+   pairing token **a single time**, plus ready-to-paste SQL for scheduling
+   the background jobs. Save that page.
+
+The step-by-step version of the same thing:
+
 ### 1. Supabase project
 
 1. Create a project at [supabase.com](https://supabase.com).
