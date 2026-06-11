@@ -156,7 +156,7 @@ export default function StudentHomePage() {
                 )}
                 {late && (
                   <span className="mt-1 block font-semibold">
-                    You're late — head back and sign in at the office.
+                    You&apos;re late — head back and sign in at the office.
                   </span>
                 )}
               </p>
@@ -202,7 +202,7 @@ export default function StudentHomePage() {
             {me.requests.length === 0 ? (
               <p className="rounded-2xl bg-ink-800 px-4 py-5 text-sm text-paper/50">
                 Nothing planned. Request ahead for places like Town so a
-                teacher can approve before you're at the office.
+                teacher can approve before you&apos;re at the office.
               </p>
             ) : (
               <ul className="space-y-2">
