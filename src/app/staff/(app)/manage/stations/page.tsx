@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useInitialLoad } from "@/hooks/useRealtime";
 import { ErrorNotice, Spinner } from "@/components/Notice";
 import { fmtDayTime } from "@/lib/time";
 import { useStaff } from "../../StaffContext";
@@ -38,9 +39,7 @@ export default function ManageStationsPage() {
     }
   }, []);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  useInitialLoad(refetch);
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
@@ -191,7 +190,7 @@ export default function ManageStationsPage() {
 
       <p className="text-xs text-ink/40">
         The station session lives on the device, not in a student account —
-        that's what makes office timestamps trustworthy. Rotate the token if
+        that&apos;s what makes office timestamps trustworthy. Rotate the token if
         an iPad goes missing.
       </p>
     </div>

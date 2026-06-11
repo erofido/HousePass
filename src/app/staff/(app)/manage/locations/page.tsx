@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { useRealtimeRefetch } from "@/hooks/useRealtime";
+import { useInitialLoad, useRealtimeRefetch } from "@/hooks/useRealtime";
 import { ErrorNotice, Spinner } from "@/components/Notice";
 import { cn } from "@/lib/cn";
 import type { Location } from "@/lib/types";
@@ -36,9 +36,7 @@ export default function ManageLocationsPage() {
     setRows((data as Location[]) ?? []);
   }, []);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  useInitialLoad(refetch);
   useRealtimeRefetch(["locations"], refetch);
 
   async function add(e: React.FormEvent) {
@@ -183,7 +181,7 @@ export default function ManageLocationsPage() {
       <p className="text-xs text-ink/40">
         “Self-service” destinations sign out instantly at the iPad. “Needs
         approval” destinations wait for a teacher on the Approvals queue.
-        Retired destinations stay attached to old records but can't be picked.
+        Retired destinations stay attached to old records but can&apos;t be picked.
       </p>
     </div>
   );

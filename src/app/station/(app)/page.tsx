@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useInitialLoad } from "@/hooks/useRealtime";
 import { BrandLockup } from "@/components/Brand";
 import { Spinner } from "@/components/Notice";
 import { cn } from "@/lib/cn";
@@ -111,8 +112,8 @@ export default function StationKiosk() {
     if (studs.ok) setStudents(studs.data.students);
   }, [router]);
 
+  useInitialLoad(loadReference);
   useEffect(() => {
-    loadReference();
     const t = setInterval(loadReference, 5 * 60_000);
     return () => clearInterval(t);
   }, [loadReference]);
@@ -292,7 +293,6 @@ export default function StationKiosk() {
         {phase.name === "student" && (
           <StudentScreen
             r={phase.r}
-            via={phase.via}
             locations={locations}
             busy={busy}
             onSignIn={() => doSignIn(phase.r.student, phase.via)}
@@ -417,7 +417,6 @@ function NamePicker({
 
 function StudentScreen({
   r,
-  via,
   locations,
   busy,
   onSignIn,
@@ -427,7 +426,6 @@ function StudentScreen({
   bump,
 }: {
   r: IdentifyResult;
-  via: Via;
   locations: KLocation[];
   busy: boolean;
   onSignIn: () => void;

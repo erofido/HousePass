@@ -10,7 +10,9 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
  */
 export function useRealtimeRefetch(tables: string[], onChange: () => void) {
   const cb = useRef(onChange);
-  cb.current = onChange;
+  useEffect(() => {
+    cb.current = onChange;
+  });
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -39,4 +41,19 @@ export function useRealtimeRefetch(tables: string[], onChange: () => void) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tables.join(",")]);
+}
+
+/**
+ * Kick off an initial (async) load after mount. Deferring by a tick keeps
+ * data fetching out of the synchronous effect path.
+ */
+export function useInitialLoad(load: () => void | Promise<unknown>) {
+  const ref = useRef(load);
+  useEffect(() => {
+    ref.current = load;
+  });
+  useEffect(() => {
+    const t = setTimeout(() => void ref.current(), 0);
+    return () => clearTimeout(t);
+  }, []);
 }

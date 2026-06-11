@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { useRealtimeRefetch } from "@/hooks/useRealtime";
+import { useInitialLoad, useRealtimeRefetch } from "@/hooks/useRealtime";
 import { friendlyDbMessage } from "@/lib/db-errors";
 import { cn } from "@/lib/cn";
 import { fmtDayTime, fmtDuration, isOverdue, minutesLate, minutesOut } from "@/lib/time";
@@ -55,9 +55,7 @@ export default function LiveBoardPage() {
     setPendingCount(pending.count ?? 0);
   }, []);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  useInitialLoad(refetch);
   useRealtimeRefetch(["outings", "students"], refetch);
 
   const visibleRows = useMemo(

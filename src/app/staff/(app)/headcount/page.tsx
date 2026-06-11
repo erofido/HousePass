@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { useRealtimeRefetch } from "@/hooks/useRealtime";
+import { useInitialLoad, useRealtimeRefetch } from "@/hooks/useRealtime";
 import { fmtDayTime, fmtTime, isOverdue } from "@/lib/time";
 import { cn } from "@/lib/cn";
 import type { LiveBoardRow } from "@/lib/types";
@@ -48,9 +48,7 @@ export default function HeadcountPage() {
     setGeneratedAt(new Date());
   }, []);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  useInitialLoad(refetch);
   useRealtimeRefetch(["outings", "students"], refetch);
 
   const byOuting = new Map(board.map((b) => [b.student_id, b]));

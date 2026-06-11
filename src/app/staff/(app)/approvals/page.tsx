@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { useRealtimeRefetch } from "@/hooks/useRealtime";
+import { useInitialLoad, useRealtimeRefetch } from "@/hooks/useRealtime";
 import { friendlyDbMessage } from "@/lib/db-errors";
 import { fmtDayTime, timeInputToIso } from "@/lib/time";
 import { Spinner } from "@/components/Notice";
@@ -48,9 +48,7 @@ export default function ApprovalsPage() {
     setRows((data as unknown as RequestRow[]) ?? []);
   }, []);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  useInitialLoad(refetch);
   useRealtimeRefetch(["outings"], refetch);
 
   async function act(row: RequestRow, action: "approve" | "deny") {
@@ -160,7 +158,7 @@ export default function ApprovalsPage() {
 
       <p className="text-xs text-ink/40">
         Approving sets you as the approver in the audit log. The student still
-        confirms departure at the office iPad — that's when the clock starts.
+        confirms departure at the office iPad — that&apos;s when the clock starts.
       </p>
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import { useInitialLoad } from "@/hooks/useRealtime";
 import { ErrorNotice, Spinner } from "@/components/Notice";
 import { cn } from "@/lib/cn";
 import type { Staff } from "@/lib/types";
@@ -33,9 +34,7 @@ export default function ManageStaffPage() {
     setRows((data as Staff[]) ?? []);
   }, []);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  useInitialLoad(refetch);
 
   if (me.role !== "leadership") {
     return (

@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
-import { useRealtimeRefetch } from "@/hooks/useRealtime";
+import { useInitialLoad, useRealtimeRefetch } from "@/hooks/useRealtime";
 import { ErrorNotice, Spinner } from "@/components/Notice";
 import { cn } from "@/lib/cn";
 import { useStaff } from "../../StaffContext";
@@ -51,9 +51,7 @@ export default function ManageStudentsPage() {
     setRows((data as Row[]) ?? []);
   }, []);
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  useInitialLoad(refetch);
   useRealtimeRefetch(["students"], refetch);
 
   async function addStudent(e: React.FormEvent) {

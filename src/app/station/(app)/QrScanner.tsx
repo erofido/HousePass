@@ -20,9 +20,11 @@ export function QrScanner({
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const onScanRef = useRef(onScan);
-  onScanRef.current = onScan;
   const pausedRef = useRef(paused);
-  pausedRef.current = paused;
+  useEffect(() => {
+    onScanRef.current = onScan;
+    pausedRef.current = paused;
+  });
 
   const [facing, setFacing] = useState<"user" | "environment">("user");
   const [error, setError] = useState<string | null>(null);
