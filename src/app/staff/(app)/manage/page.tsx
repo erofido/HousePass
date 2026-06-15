@@ -19,6 +19,11 @@ export default function ManagePage() {
     ...(staff.role === "leadership"
       ? [
           {
+            href: "/staff/manage/houses",
+            title: "Boarding houses",
+            desc: "Add or rename the houses HousePass runs for.",
+          },
+          {
             href: "/staff/manage/staff",
             title: "Staff accounts",
             desc: "Create house staff and leadership logins, deactivate leavers.",

@@ -118,6 +118,12 @@ export default function ManageStudentsPage() {
         <div className="flex items-center gap-3">
           <HouseFilter houses={houses} value={houseFilter} onChange={setHouseFilter} />
           <Link
+            href="/staff/manage/students/import"
+            className="rounded-xl border border-ink/15 px-4 py-2 text-sm font-medium transition-colors hover:bg-ink/5"
+          >
+            Import
+          </Link>
+          <Link
             href="/staff/manage/students/print"
             className="rounded-xl border border-ink/15 px-4 py-2 text-sm font-medium transition-colors hover:bg-ink/5"
           >
