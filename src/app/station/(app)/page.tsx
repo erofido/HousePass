@@ -49,7 +49,7 @@ type Phase =
   | { name: "student"; r: IdentifyResult; via: Via }
   | { name: "success"; title: string; detail: string; tone: "out" | "in" | "wait" };
 
-const QR_PREFIX = "HP1:";
+const QR_PREFIX = "HP2:";
 const IDLE_RESET_MS = 60_000;
 const SUCCESS_RESET_MS = 5_000;
 
@@ -138,7 +138,7 @@ export default function StationKiosk() {
   }
 
   /* identify by scan or tap */
-  async function identify(input: { qrToken?: string; studentId?: string }, via: Via) {
+  async function identify(input: { qr?: string; studentId?: string }, via: Via) {
     bump();
     setBusy(true);
     setError(null);
@@ -154,8 +154,9 @@ export default function StationKiosk() {
   const onScan = useCallback(
     (payload: string) => {
       if (!payload.startsWith(QR_PREFIX)) return;
+      // pass the whole rotating payload; the server verifies + consumes it
       if (phase.name !== "idle" && phase.name !== "names") return;
-      identify({ qrToken: payload.slice(QR_PREFIX.length) }, "kiosk_qr");
+      identify({ qr: payload }, "kiosk_qr");
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [phase.name],

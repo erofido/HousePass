@@ -123,12 +123,6 @@ export default function ManageStudentsPage() {
           >
             Import
           </Link>
-          <Link
-            href="/staff/manage/students/print"
-            className="rounded-xl border border-ink/15 px-4 py-2 text-sm font-medium transition-colors hover:bg-ink/5"
-          >
-            Print QR cards
-          </Link>
           <button
             type="button"
             onClick={() => setAdding((v) => !v)}

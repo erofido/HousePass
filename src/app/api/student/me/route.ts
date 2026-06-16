@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { jsonError } from "@/lib/api";
 import { getStudentSession } from "@/lib/student-auth";
+import { QR_PERIOD_SECONDS } from "@/lib/totp";
 
 interface OutingRow {
   id: string;
@@ -22,7 +23,9 @@ export async function GET() {
   const db = createSupabaseAdminClient();
   const { data: student, error } = await db
     .from("students")
-    .select("id, house_id, full_name, room, year_group, status, qr_token, active, houses(name)")
+    .select(
+      "id, house_id, full_name, room, year_group, status, qr_token, qr_secret, active, houses(name)",
+    )
     .eq("id", session.id)
     .maybeSingle();
 
@@ -61,8 +64,16 @@ export async function GET() {
       yearGroup: student.year_group,
       status: student.status,
       houseName: (student.houses as unknown as { name: string } | null)?.name ?? "",
-      qrPayload: `HP1:${student.qr_token}`,
     },
+    // The phone derives a rotating code from this locally (see PassQr); the
+    // server clock (serverTime) is the source of truth so a wrong device
+    // clock can't desync an honest student.
+    qr: {
+      token: student.qr_token,
+      secret: student.qr_secret,
+      period: QR_PERIOD_SECONDS,
+    },
+    serverTime: Date.now(),
     openOuting: open ? pack(open) : null,
     requests: (outings ?? []).filter((o) => o.status !== "out").map(pack),
   });

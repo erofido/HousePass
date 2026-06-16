@@ -63,12 +63,17 @@ export async function PATCH(
   }
 
   if (data.action === "regenerate_qr") {
-    const qrToken = randomBytes(20).toString("hex");
+    // Reissue the whole pass: new lookup token AND new rotating secret, and
+    // reset the replay counter. Any old screenshot/device is invalidated.
     const { error: e } = await db
       .from("students")
-      .update({ qr_token: qrToken })
+      .update({
+        qr_token: randomBytes(20).toString("hex"),
+        qr_secret: randomBytes(20).toString("hex"),
+        last_qr_step: 0,
+      })
       .eq("id", id);
-    if (e) return jsonError(500, "server_error", "Could not regenerate the QR token");
+    if (e) return jsonError(500, "server_error", "Could not regenerate the pass");
     await audit("student.qr_regenerated");
     return NextResponse.json({ ok: true });
   }

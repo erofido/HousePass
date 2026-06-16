@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import QRCode from "qrcode";
 import { BrandLockup } from "@/components/Brand";
+import { PassQr } from "@/components/PassQr";
 import { PushToggle } from "@/components/PushToggle";
 import { useInitialLoad } from "@/hooks/useRealtime";
 import { cn } from "@/lib/cn";
@@ -28,8 +28,9 @@ interface Me {
     yearGroup: string | null;
     status: "in" | "out";
     houseName: string;
-    qrPayload: string;
   };
+  qr: { token: string; secret: string; period: number };
+  serverTime: number;
   openOuting: MeOuting | null;
   requests: MeOuting[];
 }
@@ -37,7 +38,9 @@ interface Me {
 export default function StudentHomePage() {
   const router = useRouter();
   const [me, setMe] = useState<Me | null>(null);
-  const [qr, setQr] = useState<string | null>(null);
+  // device→server clock offset, fixed on first load so a wrong device clock
+  // never desyncs the rotating pass
+  const [offset, setOffset] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cancelBusy, setCancelBusy] = useState<string | null>(null);
 
@@ -55,6 +58,7 @@ export default function StudentHomePage() {
       }
       setError(null);
       setMe(data as Me);
+      setOffset((prev) => (prev === null ? data.serverTime - Date.now() : prev));
     } catch {
       setError("You're offline — showing the last known status.");
     }
@@ -74,15 +78,6 @@ export default function StudentHomePage() {
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [refetch]);
-
-  useEffect(() => {
-    if (!me) return;
-    QRCode.toDataURL(me.student.qrPayload, {
-      width: 480,
-      margin: 1,
-      color: { dark: "#0c1422", light: "#ffffff" },
-    }).then(setQr);
-  }, [me?.student.qrPayload]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function cancel(outingId: string) {
     setCancelBusy(outingId);
@@ -175,12 +170,12 @@ export default function StudentHomePage() {
             <p className="text-sm text-ink/60">
               Show this to the office iPad to sign {out ? "back in" : "out"}.
             </p>
-            {qr ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={qr}
-                alt="Your personal HousePass QR code"
-                className="mx-auto mt-3 w-56 max-w-full rounded-xl"
+            {offset !== null ? (
+              <PassQr
+                token={me.qr.token}
+                secret={me.qr.secret}
+                period={me.qr.period}
+                serverOffsetMs={offset}
               />
             ) : (
               <div className="mx-auto mt-3 aspect-square w-56 animate-pulse rounded-xl bg-ink/5" />
