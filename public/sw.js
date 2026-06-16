@@ -2,7 +2,7 @@
  * Data is never served stale from here — the surfaces show their own
  * offline states; this only keeps navigation from dying with a browser
  * error screen. */
-const VERSION = "housepass-v1";
+const VERSION = "housepass-v2";
 const OFFLINE_URL = "/offline";
 const PRECACHE = [OFFLINE_URL, "/icons/icon-192.png", "/icons/icon-512.png"];
 
@@ -57,4 +57,42 @@ self.addEventListener("fetch", (event) => {
     );
   }
   // Everything else (API calls, realtime): straight to the network.
+});
+
+// --- Web Push -------------------------------------------------------------
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { title: "HousePass", body: event.data ? event.data.text() : "" };
+  }
+  const title = data.title || "HousePass";
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/icon-192.png",
+      tag: data.tag,
+      renotify: Boolean(data.tag),
+      data: { url: data.url || "/" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    }),
+  );
 });

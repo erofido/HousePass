@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { BrandLockup } from "@/components/Brand";
+import { PushToggle } from "@/components/PushToggle";
 import type { House, Staff } from "@/lib/types";
 import { StaffProvider } from "./StaffContext";
 import { SignOutButton } from "./SignOutButton";
@@ -63,6 +64,7 @@ export default async function StaffLayout({
                   </span>
                 )}
               </span>
+              <PushToggle tone="dark" />
               <SignOutButton />
             </div>
           </div>

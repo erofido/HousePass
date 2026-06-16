@@ -100,6 +100,13 @@ function cronSnippet(origin: string, secret: string): string {
   return `create extension if not exists pg_cron;
 create extension if not exists pg_net;
 
+select cron.schedule('housepass-notifications', '*/2 * * * *', $$
+  select net.http_post(
+    url     := '${origin}/api/cron/notifications',
+    headers := jsonb_build_object('Authorization', 'Bearer ${secret}')
+  );
+$$);
+
 select cron.schedule('housepass-late-alerts', '*/5 * * * *', $$
   select net.http_post(
     url     := '${origin}/api/cron/late-alerts',
@@ -118,7 +125,8 @@ $$);`;
 function cronSection(sql: string): string {
   return `<h2>Last step: schedule the background jobs</h2>
   <p>Copy this into your Supabase <strong>SQL Editor</strong> and run it once
-  (late-alert emails every 5 minutes, data retention nightly):</p>
+  (push reminders every 2 minutes, late-alert emails every 5 minutes, data
+  retention nightly):</p>
   <pre>${escapeHtml(sql)}</pre>`;
 }
 

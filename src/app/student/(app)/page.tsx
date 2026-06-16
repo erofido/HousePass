@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import { BrandLockup } from "@/components/Brand";
+import { PushToggle } from "@/components/PushToggle";
 import { useInitialLoad } from "@/hooks/useRealtime";
 import { cn } from "@/lib/cn";
 import { fmtDayTime, fmtTime, isOverdue } from "@/lib/time";
@@ -185,6 +186,17 @@ export default function StudentHomePage() {
               <div className="mx-auto mt-3 aspect-square w-56 animate-pulse rounded-xl bg-ink/5" />
             )}
             <p className="mt-2 text-xs text-ink/40">{me.student.fullName}</p>
+          </section>
+
+          {/* notifications */}
+          <section className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-ink-800 px-4 py-3">
+            <div>
+              <p className="font-medium">Reminders</p>
+              <p className="text-sm text-paper/50">
+                Get a nudge before you&apos;re due back, and if you run late.
+              </p>
+            </div>
+            <PushToggle tone="dark" />
           </section>
 
           {/* requests */}

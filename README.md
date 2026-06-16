@@ -121,6 +121,22 @@ npm run dev            # local
 (Production + Preview), deploy. No `vercel.json` needed. The camera
 scanner requires HTTPS, which Vercel provides.
 
+### 4a. Push notifications (optional)
+
+Students get a "be back soon" reminder before due and an "overdue" nudge
+after; staff get an "X is late" push. It's free Web Push (no third party):
+
+1. Generate a keypair: `npx web-push generate-vapid-keys`.
+2. In Vercel add `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
+   `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (= the public key), `VAPID_SUBJECT`
+   (`mailto:you@school`), and optionally `REMIND_BEFORE_MINUTES` (default 10);
+   redeploy.
+3. Users tap **Turn on notifications** in the student app / staff dashboard.
+   On iPhone the app must be added to the Home Screen first (Apple's rule).
+
+The `housepass-notifications` cron (in the scheduling step below) drives the
+timed reminders.
+
 ### 5. Schedule the background jobs
 
 The two jobs are plain authenticated endpoints — point any scheduler at

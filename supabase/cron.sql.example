@@ -11,7 +11,19 @@
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
 
--- Late alerts: every 5 minutes.
+-- Push reminders + overdue notifications: every 2 minutes.
+select cron.schedule(
+  'housepass-notifications',
+  '*/2 * * * *',
+  $$
+  select net.http_post(
+    url     := 'YOUR_APP_URL/api/cron/notifications',
+    headers := jsonb_build_object('Authorization', 'Bearer YOUR_CRON_SECRET')
+  );
+  $$
+);
+
+-- Late alerts (email): every 5 minutes.
 select cron.schedule(
   'housepass-late-alerts',
   '*/5 * * * *',
