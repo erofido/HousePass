@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { jsonError } from "@/lib/api";
 import { requireStation } from "@/lib/station-auth";
+import { QR_PERIOD_SECONDS } from "@/lib/totp";
 
-/** Station + house identity for the kiosk header. */
+/** Station identity + its rotating code seed, for the iPad to display. */
 export async function GET() {
   const { session, response } = await requireStation();
   if (!session) return response;
@@ -11,7 +12,7 @@ export async function GET() {
   const db = createSupabaseAdminClient();
   const { data, error } = await db
     .from("stations")
-    .select("id, name, active, houses(name)")
+    .select("id, name, active, code_secret, houses(name)")
     .eq("id", session.id)
     .maybeSingle();
 
@@ -31,5 +32,8 @@ export async function GET() {
       name: data.name,
       houseName: (data.houses as unknown as { name: string } | null)?.name ?? "",
     },
+    // the iPad renders a rotating QR locally from this (see station page)
+    code: { secret: data.code_secret, period: QR_PERIOD_SECONDS },
+    serverTime: Date.now(),
   });
 }

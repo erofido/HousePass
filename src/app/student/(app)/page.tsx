@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BrandLockup } from "@/components/Brand";
-import { PassQr } from "@/components/PassQr";
 import { PushToggle } from "@/components/PushToggle";
 import { useInitialLoad } from "@/hooks/useRealtime";
 import { cn } from "@/lib/cn";
@@ -29,8 +28,6 @@ interface Me {
     status: "in" | "out";
     houseName: string;
   };
-  qr: { token: string; secret: string; period: number };
-  serverTime: number;
   openOuting: MeOuting | null;
   requests: MeOuting[];
 }
@@ -38,9 +35,6 @@ interface Me {
 export default function StudentHomePage() {
   const router = useRouter();
   const [me, setMe] = useState<Me | null>(null);
-  // device→server clock offset, fixed on first load so a wrong device clock
-  // never desyncs the rotating pass
-  const [offset, setOffset] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cancelBusy, setCancelBusy] = useState<string | null>(null);
 
@@ -58,7 +52,6 @@ export default function StudentHomePage() {
       }
       setError(null);
       setMe(data as Me);
-      setOffset((prev) => (prev === null ? data.serverTime - Date.now() : prev));
     } catch {
       setError("You're offline — showing the last known status.");
     }
@@ -164,24 +157,18 @@ export default function StudentHomePage() {
             )}
           </section>
 
-          {/* personal QR */}
-          <section className="rounded-3xl bg-paper p-6 text-center text-ink">
-            <h2 className="text-lg font-semibold">Your pass</h2>
-            <p className="text-sm text-ink/60">
-              Show this to the office iPad to sign {out ? "back in" : "out"}.
-            </p>
-            {offset !== null ? (
-              <PassQr
-                token={me.qr.token}
-                secret={me.qr.secret}
-                period={me.qr.period}
-                serverOffsetMs={offset}
-              />
-            ) : (
-              <div className="mx-auto mt-3 aspect-square w-56 animate-pulse rounded-xl bg-ink/5" />
-            )}
-            <p className="mt-2 text-xs text-ink/40">{me.student.fullName}</p>
-          </section>
+          {/* primary action: scan the office screen */}
+          <Link
+            href="/student/go"
+            className="block rounded-3xl bg-teal p-6 text-center text-ink transition-colors hover:bg-mint"
+          >
+            <span className="block text-2xl font-semibold">
+              {out ? "Sign back in" : "Sign out"}
+            </span>
+            <span className="mt-1 block text-ink/70">
+              Scan the code on the office iPad
+            </span>
+          </Link>
 
           {/* notifications */}
           <section className="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-ink-800 px-4 py-3">

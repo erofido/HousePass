@@ -5,18 +5,21 @@ import jsQR from "jsqr";
 import { cn } from "@/lib/cn";
 
 /**
- * Continuous camera QR scanner (jsQR over a canvas loop — works in iPad
- * Safari, no native BarcodeDetector needed). Repeats of the same payload
- * within a few seconds are suppressed so one held-up phone fires once.
+ * Continuous camera QR scanner (jsQR over a canvas loop — works in mobile
+ * Safari/Chrome, no native BarcodeDetector needed). Repeats of the same
+ * payload within a few seconds are suppressed. Defaults to the rear camera
+ * (a phone scanning the office screen); flip button switches.
  */
 export function QrScanner({
   onScan,
   paused,
   className,
+  defaultFacing = "environment",
 }: {
   onScan: (payload: string) => void;
   paused: boolean;
   className?: string;
+  defaultFacing?: "user" | "environment";
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const onScanRef = useRef(onScan);
@@ -26,7 +29,7 @@ export function QrScanner({
     pausedRef.current = paused;
   });
 
-  const [facing, setFacing] = useState<"user" | "environment">("user");
+  const [facing, setFacing] = useState<"user" | "environment">(defaultFacing);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -74,7 +77,7 @@ export function QrScanner({
         }, 250);
       } catch {
         if (!cancelled) {
-          setError("Camera unavailable — use “Tap your name” below.");
+          setError("Camera unavailable — allow camera access, or ask staff to tap your name.");
         }
       }
     }
@@ -89,7 +92,6 @@ export function QrScanner({
 
   return (
     <div className={cn("relative overflow-hidden rounded-3xl bg-ink-800", className)}>
-      {/* mirrored like a selfie view so aiming feels natural */}
       <video
         ref={videoRef}
         playsInline

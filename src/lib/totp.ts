@@ -74,3 +74,30 @@ export function parseRotatingPayload(
   if (!token || !code) return null;
   return { token, code };
 }
+
+/**
+ * Verify a station code presented by a phone. Unlike the student pass we do
+ * NOT consume the step — the station code is shared by everyone scanning that
+ * screen, so single-use would block the queue. Freshness (current ±1 step)
+ * is what proves "you were at the screen just now".
+ */
+export function verifyStationCode(
+  secretHex: string,
+  code: string,
+  periodSeconds = QR_PERIOD_SECONDS,
+  nowMs = Date.now(),
+): boolean {
+  return verifyRotatingCode(secretHex, code, 0, periodSeconds, nowMs).ok;
+}
+
+/** Parse a station scan payload "HPK:<station_id>:<code>". */
+export function parseStationPayload(
+  payload: string,
+): { stationId: string; code: string } | null {
+  if (!payload.startsWith("HPK:")) return null;
+  const parts = payload.slice(4).split(":");
+  if (parts.length !== 2) return null;
+  const [stationId, code] = parts;
+  if (!stationId || !code) return null;
+  return { stationId, code };
+}

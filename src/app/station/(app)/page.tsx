@@ -7,7 +7,7 @@ import { BrandLockup } from "@/components/Brand";
 import { Spinner } from "@/components/Notice";
 import { cn } from "@/lib/cn";
 import { backByChoices, fmtTime, timeInputToIso } from "@/lib/time";
-import { QrScanner } from "./QrScanner";
+import { RotatingQr } from "@/components/RotatingQr";
 
 /* ----------------------------- data shapes ------------------------------ */
 
@@ -49,9 +49,14 @@ type Phase =
   | { name: "student"; r: IdentifyResult; via: Via }
   | { name: "success"; title: string; detail: string; tone: "out" | "in" | "wait" };
 
-const QR_PREFIX = "HP2:";
 const IDLE_RESET_MS = 60_000;
 const SUCCESS_RESET_MS = 5_000;
+
+interface StationCode {
+  stationId: string;
+  secret: string;
+  period: number;
+}
 
 async function api<T>(
   path: string,
@@ -92,6 +97,8 @@ export default function StationKiosk() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [clock, setClock] = useState(() => new Date());
+  const [code, setCode] = useState<StationCode | null>(null);
+  const [offset, setOffset] = useState<number | null>(null);
 
   /* header clock */
   useEffect(() => {
@@ -99,11 +106,24 @@ export default function StationKiosk() {
     return () => clearInterval(t);
   }, []);
 
-  /* station identity + reference data */
+  /* station identity + rotating code seed + reference data */
   const loadReference = useCallback(async () => {
-    const me = await api<{ station: { houseName: string } }>("/api/station/me");
-    if (me.ok) setHouseName(me.data.station.houseName);
-    else if (me.code === "station_unpaired") router.replace("/station/setup");
+    const me = await api<{
+      station: { id: string; houseName: string };
+      code: { secret: string; period: number };
+      serverTime: number;
+    }>("/api/station/me");
+    if (me.ok) {
+      setHouseName(me.data.station.houseName);
+      setCode({
+        stationId: me.data.station.id,
+        secret: me.data.code.secret,
+        period: me.data.code.period,
+      });
+      setOffset((prev) => (prev === null ? me.data.serverTime - Date.now() : prev));
+    } else if (me.code === "station_unpaired") {
+      router.replace("/station/setup");
+    }
 
     const locs = await api<{ locations: KLocation[] }>("/api/station/locations");
     if (locs.ok) setLocations(locs.data.locations);
@@ -150,17 +170,6 @@ export default function StationKiosk() {
     }
     setPhase({ name: "student", r: res.data, via });
   }
-
-  const onScan = useCallback(
-    (payload: string) => {
-      if (!payload.startsWith(QR_PREFIX)) return;
-      // pass the whole rotating payload; the server verifies + consumes it
-      if (phase.name !== "idle" && phase.name !== "names") return;
-      identify({ qr: payload }, "kiosk_qr");
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [phase.name],
-  );
 
   /* actions */
   async function doSignIn(student: KStudent, via: Via) {
@@ -279,7 +288,14 @@ export default function StationKiosk() {
         )}
 
         {phase.name === "idle" && (
-          <IdleScreen onScan={onScan} busy={busy} onNames={() => { bump(); setPhase({ name: "names" }); }} />
+          <IdleScreen
+            code={code}
+            offset={offset}
+            onNames={() => {
+              bump();
+              setPhase({ name: "names" });
+            }}
+          />
         )}
 
         {phase.name === "names" && (
@@ -317,13 +333,13 @@ function firstName(full: string) {
 /* ------------------------------ idle screen ----------------------------- */
 
 function IdleScreen({
-  onScan,
+  code,
+  offset,
   onNames,
-  busy,
 }: {
-  onScan: (payload: string) => void;
+  code: StationCode | null;
+  offset: number | null;
   onNames: () => void;
-  busy: boolean;
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
@@ -332,11 +348,25 @@ function IdleScreen({
           Going out, or coming back?
         </h1>
         <p className="mt-3 text-lg text-paper/60">
-          Hold your pass up to the camera{busy && <Spinner className="ml-2" />}
+          Open HousePass on your phone and scan this code to sign out or in.
         </p>
       </div>
 
-      <QrScanner onScan={onScan} paused={busy} className="aspect-[4/3] w-full max-w-md" />
+      <div className="rounded-3xl bg-white p-5">
+        {code && offset !== null ? (
+          <RotatingQr
+            prefix="HPK:"
+            id={code.stationId}
+            secret={code.secret}
+            period={code.period}
+            serverOffsetMs={offset}
+            size={520}
+            className="w-72 max-w-[70vw]"
+          />
+        ) : (
+          <div className="aspect-square w-72 max-w-[70vw] animate-pulse rounded-xl bg-ink/5" />
+        )}
+      </div>
 
       <button
         type="button"
