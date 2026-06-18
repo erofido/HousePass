@@ -8,6 +8,7 @@ const tabs = [
   { href: "/staff", label: "Live board", exact: true },
   { href: "/staff/approvals", label: "Approvals", exact: false },
   { href: "/staff/headcount", label: "Headcount", exact: false },
+  { href: "/staff/history", label: "History", exact: false },
   { href: "/staff/manage", label: "Manage", exact: false },
 ];
 
