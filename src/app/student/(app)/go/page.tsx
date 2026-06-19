@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { QrScanner } from "@/components/QrScanner";
 import { useInitialLoad } from "@/hooks/useRealtime";
 import { ErrorNotice, Spinner } from "@/components/Notice";
 import { cn } from "@/lib/cn";
-import { backByChoices, fmtTime, timeInputToIso } from "@/lib/time";
+import { backByChoicesWithCurfew, fmtTime, timeInputToIso } from "@/lib/time";
 
 /* Sign out / in by scanning the office iPad's rotating code. */
 
@@ -18,7 +18,7 @@ interface Outing {
   expectedBackAt: string | null;
 }
 interface Me {
-  student: { fullName: string; status: "in" | "out" };
+  student: { fullName: string; status: "in" | "out"; curfewTime?: string | null };
   openOuting: Outing | null;
   requests: Outing[];
 }
@@ -45,9 +45,18 @@ export default function GoPage() {
 
   // destination picker state (going out, no approved outing)
   const [pickedLoc, setPickedLoc] = useState<Loc | null>(null);
-  const [choices] = useState(() => backByChoices());
-  const [selectedIso, setSelectedIso] = useState<string>(choices[1]?.iso ?? choices[0]?.iso);
+  const [selectedIso, setSelectedIso] = useState<string>("");
   const [customTime, setCustomTime] = useState("");
+
+  // back-by choices, capped by the student's year-group curfew
+  const { choices, curfewIso } = useMemo(
+    () => backByChoicesWithCurfew(me?.student.curfewTime ?? null),
+    [me?.student.curfewTime],
+  );
+  const defaultIso = curfewIso ?? choices[1]?.iso ?? choices[0]?.iso;
+  const chosenIso = selectedIso && choices.some((c) => c.iso === selectedIso) ? selectedIso : defaultIso;
+  const customIso = customTime ? timeInputToIso(customTime) : null;
+  const customTooLate = Boolean(customIso && curfewIso && customIso > curfewIso);
 
   useInitialLoad(async () => {
     try {
@@ -103,7 +112,7 @@ export default function GoPage() {
     }
   }
 
-  const effectiveIso = customTime ? timeInputToIso(customTime) : selectedIso;
+  const effectiveIso = customTime ? (customTooLate ? null : customIso) : chosenIso;
 
   /* ---- success ---- */
   if (done) {
@@ -236,7 +245,7 @@ export default function GoPage() {
                       }}
                       className={cn(
                         "rounded-xl px-4 py-2.5 transition-colors",
-                        !customTime && selectedIso === c.iso
+                        !customTime && chosenIso === c.iso
                           ? "bg-mint font-medium text-ink"
                           : "bg-ink-700 hover:bg-ink-600",
                       )}
@@ -251,10 +260,15 @@ export default function GoPage() {
                     aria-label="Custom back-by time"
                     className={cn(
                       "rounded-xl border border-ink-600 bg-ink-700 px-3 py-2 text-paper",
-                      customTime && "border-mint",
+                      customTime && (customTooLate ? "border-alert" : "border-mint"),
                     )}
                   />
                 </div>
+                {customTooLate && curfewIso && (
+                  <p className="mt-2 text-sm text-warn">
+                    Your year&apos;s curfew is {fmtTime(curfewIso)} — pick that time or earlier.
+                  </p>
+                )}
                 <button
                   type="button"
                   disabled={!effectiveIso}

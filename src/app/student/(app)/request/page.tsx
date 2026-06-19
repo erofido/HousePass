@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useInitialLoad } from "@/hooks/useRealtime";
 import { ErrorNotice, Spinner } from "@/components/Notice";
 import { cn } from "@/lib/cn";
-import { backByChoices, timeInputToIso } from "@/lib/time";
+import { backByChoicesWithCurfew, fmtTime, timeInputToIso } from "@/lib/time";
 
 interface Loc {
   id: string;
@@ -17,11 +17,11 @@ interface Loc {
 export default function RequestOutingPage() {
   const router = useRouter();
   const [locations, setLocations] = useState<Loc[] | null>(null);
+  const [curfewTime, setCurfewTime] = useState<string | null>(null);
   const [picked, setPicked] = useState<Loc | null>(null);
   const [freeText, setFreeText] = useState("");
   const [useFreeText, setUseFreeText] = useState(false);
-  const [choices] = useState(() => backByChoices());
-  const [selectedIso, setSelectedIso] = useState<string>(choices[1]?.iso ?? choices[0]?.iso);
+  const [selectedIso, setSelectedIso] = useState<string>("");
   const [customTime, setCustomTime] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -29,16 +29,31 @@ export default function RequestOutingPage() {
 
   useInitialLoad(async () => {
     try {
-      const res = await fetch("/api/student/locations");
-      const data = await res.json();
-      if (res.ok) setLocations(data.locations);
+      const [locRes, meRes] = await Promise.all([
+        fetch("/api/student/locations"),
+        fetch("/api/student/me"),
+      ]);
+      const data = await locRes.json();
+      if (locRes.ok) setLocations(data.locations);
       else setError(data.error?.message ?? "Couldn't load destinations.");
+      if (meRes.ok) {
+        const me = await meRes.json();
+        setCurfewTime(me.student?.curfewTime ?? null);
+      }
     } catch {
       setError("You're offline — try again when connected.");
     }
   });
 
-  const effectiveIso = customTime ? timeInputToIso(customTime) : selectedIso;
+  const { choices, curfewIso } = useMemo(
+    () => backByChoicesWithCurfew(curfewTime),
+    [curfewTime],
+  );
+  const defaultIso = curfewIso ?? choices[1]?.iso ?? choices[0]?.iso;
+  const chosenIso = selectedIso && choices.some((c) => c.iso === selectedIso) ? selectedIso : defaultIso;
+  const customIso = customTime ? timeInputToIso(customTime) : null;
+  const customTooLate = Boolean(customIso && curfewIso && customIso > curfewIso);
+  const effectiveIso = customTime ? (customTooLate ? null : customIso) : chosenIso;
   const needsPermission = useFreeText || picked?.requires_permission;
 
   async function submit(e: React.FormEvent) {
@@ -163,7 +178,7 @@ export default function RequestOutingPage() {
                 }}
                 className={cn(
                   "rounded-xl px-4 py-2.5 transition-colors",
-                  !customTime && selectedIso === c.iso
+                  !customTime && chosenIso === c.iso
                     ? "bg-mint font-medium text-ink"
                     : "bg-ink-800 hover:bg-ink-700",
                 )}
@@ -179,12 +194,17 @@ export default function RequestOutingPage() {
                 onChange={(e) => setCustomTime(e.target.value)}
                 className={cn(
                   "rounded-xl border border-ink-600 bg-ink-800 px-3 py-2 text-paper",
-                  customTime && "border-mint",
+                  customTime && (customTooLate ? "border-alert" : "border-mint"),
                 )}
                 aria-label="Custom back-by time"
               />
             </label>
           </div>
+          {customTooLate && curfewIso && (
+            <p className="mt-2 text-sm text-warn">
+              Your year&apos;s curfew is {fmtTime(curfewIso)} — pick that time or earlier.
+            </p>
+          )}
         </fieldset>
 
         <label className="block text-sm font-medium text-paper/60">

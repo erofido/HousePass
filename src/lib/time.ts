@@ -46,6 +46,26 @@ export interface BackByChoice {
   iso: string;
 }
 
+/**
+ * Back-by choices capped by the student's curfew: any preset later than the
+ * curfew is dropped, and a "By curfew (TIME)" choice is offered. ISO strings
+ * are UTC, so lexicographic comparison is chronological.
+ */
+export function backByChoicesWithCurfew(
+  curfewTime: string | null,
+  now: Date = new Date(),
+): { choices: BackByChoice[]; curfewIso: string | null } {
+  const curfewIso = curfewTime ? curfewToIso(curfewTime, now) : null;
+  let choices = backByChoices(now);
+  if (curfewIso) {
+    choices = choices.filter((c) => c.iso <= curfewIso);
+    if (!choices.some((c) => c.iso === curfewIso)) {
+      choices = [...choices, { label: `By curfew (${fmtTime(curfewIso)})`, iso: curfewIso }];
+    }
+  }
+  return { choices, curfewIso };
+}
+
 export function backByChoices(now: Date = new Date()): BackByChoice[] {
   const plus = (mins: number) => new Date(now.getTime() + mins * 60000);
   const choices: BackByChoice[] = [
@@ -60,6 +80,15 @@ export function backByChoices(now: Date = new Date()): BackByChoice[] {
     choices.push({ label: `By ${fmtTime(curfew)}`, iso: curfew.toISOString() });
   }
   return choices;
+}
+
+/**
+ * A curfew time-of-day (HH:MM, school-local) as an absolute ISO for today —
+ * or tomorrow if it has already passed. Computed on the client so it uses the
+ * device's local timezone. Returns null for a malformed value.
+ */
+export function curfewToIso(hhmm: string, now: Date = new Date()): string | null {
+  return timeInputToIso(hhmm, now);
 }
 
 /** Turn an <input type="time"> value (HH:MM) into an ISO timestamp today/tomorrow. */

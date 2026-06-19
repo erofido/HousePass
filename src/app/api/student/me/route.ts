@@ -56,6 +56,19 @@ export async function GET() {
 
   const open = (outings ?? []).find((o) => o.status === "out");
 
+  // The student's year-group curfew (if set) — the app uses it as the default
+  // and cap for the "back by" time.
+  let curfewTime: string | null = null;
+  if (student.year_group) {
+    const { data: curfew } = await db
+      .from("curfews")
+      .select("back_by")
+      .eq("house_id", student.house_id)
+      .eq("year_group", student.year_group)
+      .maybeSingle();
+    if (curfew?.back_by) curfewTime = String(curfew.back_by).slice(0, 5);
+  }
+
   return NextResponse.json({
     student: {
       id: student.id,
@@ -64,6 +77,7 @@ export async function GET() {
       yearGroup: student.year_group,
       status: student.status,
       houseName: (student.houses as unknown as { name: string } | null)?.name ?? "",
+      curfewTime,
     },
     // The phone derives a rotating code from this locally (see PassQr); the
     // server clock (serverTime) is the source of truth so a wrong device

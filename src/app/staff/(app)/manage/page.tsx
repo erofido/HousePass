@@ -16,6 +16,11 @@ export default function ManagePage() {
       title: "Destinations",
       desc: "Self-service places and the ones that need a teacher's approval.",
     },
+    {
+      href: "/staff/manage/curfews",
+      title: "Curfews",
+      desc: "Per-year-group return times that pre-fill the 'back by' choice.",
+    },
     ...(staff.role === "leadership"
       ? [
           {

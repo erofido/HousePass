@@ -14,6 +14,7 @@
 drop view if exists public.live_board cascade;
 
 drop table if exists public.push_subscriptions cascade;
+drop table if exists public.curfews  cascade;
 drop table if exists public.audit_log cascade;
 drop table if exists public.outings  cascade;
 drop table if exists public.stations cascade;
