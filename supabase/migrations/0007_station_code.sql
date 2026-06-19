@@ -6,4 +6,4 @@
 -- Service-role only (stations table has no client grants), like the pairing
 -- token.
 alter table public.stations
-  add column code_secret text not null default encode(gen_random_bytes(20), 'hex');
+  add column if not exists code_secret text not null default encode(gen_random_bytes(20), 'hex');

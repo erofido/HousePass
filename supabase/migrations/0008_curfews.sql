@@ -2,7 +2,7 @@
 -- the "back by" time when a student goes out, so younger years default to an
 -- earlier return automatically.
 
-create table public.curfews (
+create table if not exists public.curfews (
   id          uuid primary key default gen_random_uuid(),
   house_id    uuid not null references public.houses (id) on delete cascade,
   year_group  text not null,
@@ -11,7 +11,7 @@ create table public.curfews (
   unique (house_id, year_group)
 );
 
-create index curfews_house_idx on public.curfews (house_id);
+create index if not exists curfews_house_idx on public.curfews (house_id);
 
 alter table public.curfews enable row level security;
 
@@ -20,6 +20,7 @@ alter table public.curfews enable row level security;
 -- default is read server-side, so students need no direct grant.
 grant select on public.curfews to authenticated;
 
+drop policy if exists curfews_select on public.curfews;
 create policy curfews_select on public.curfews
   for select to authenticated
   using (app.can_access_house(house_id));
