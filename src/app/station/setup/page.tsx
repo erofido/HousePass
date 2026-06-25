@@ -36,7 +36,7 @@ export default function StationSetupPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-ink px-6 py-12">
+    <div className="flex flex-1 items-center justify-center surface-ink px-6 py-12">
       <div className="w-full max-w-md space-y-8">
         <div className="space-y-3 text-center">
           <BrandLockup dark className="justify-center" />
@@ -52,7 +52,7 @@ export default function StationSetupPage() {
 
         <form
           onSubmit={submit}
-          className="space-y-4 rounded-2xl bg-paper p-6 shadow-card"
+          className="space-y-4 rounded-2xl bg-paper p-6 shadow-lift animate-rise"
         >
           <label className="block text-sm font-medium">
             Station token

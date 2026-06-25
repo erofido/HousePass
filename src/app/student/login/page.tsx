@@ -59,7 +59,7 @@ export default function StudentLoginPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-ink px-4 py-10">
+    <div className="flex flex-1 items-center justify-center surface-ink px-4 py-10">
       <div className="w-full max-w-sm space-y-8">
         <div className="space-y-3 text-center">
           <BrandLockup dark className="justify-center" />
@@ -71,7 +71,7 @@ export default function StudentLoginPage() {
 
         <form
           onSubmit={submit}
-          className="space-y-4 rounded-2xl bg-paper p-6 shadow-card"
+          className="space-y-4 rounded-2xl bg-paper p-6 shadow-lift animate-rise"
         >
           {houses && houses.length > 1 && (
             <label className="block text-sm font-medium">

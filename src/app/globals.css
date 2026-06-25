@@ -3,6 +3,7 @@
 @theme {
   /* HousePass brand palette */
   --color-ink: #0c1422;
+  --color-ink-900: #0a111d;
   --color-ink-800: #14202f;
   --color-ink-700: #1d2c3f;
   --color-ink-600: #2a3d55;
@@ -12,32 +13,84 @@
   --color-mint: #7fe9d8;
   --color-mint-100: #e3faf5;
   --color-paper: #fbfcfe;
+  --color-paper-200: #eef2f6;
   --color-alert: #de5b5b;
   --color-alert-600: #c74545;
   --color-alert-100: #fcecec;
   --color-warn: #f3c969;
+  --color-warn-100: #fdf4dd;
 
   --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  --shadow-card: 0 1px 2px rgb(12 20 34 / 0.06), 0 8px 24px rgb(12 20 34 / 0.07);
+  --radius-xl2: 1.25rem;
+
+  --shadow-card: 0 1px 2px rgb(12 20 34 / 0.05), 0 6px 20px rgb(12 20 34 / 0.06);
+  --shadow-lift: 0 2px 6px rgb(12 20 34 / 0.08), 0 18px 40px rgb(12 20 34 / 0.12);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   -webkit-tap-highlight-color: transparent;
 }
 
 h1,
 h2 {
   font-family: var(--font-serif);
+  letter-spacing: -0.015em;
+}
+
+::selection {
+  background: var(--color-mint);
+  color: var(--color-ink);
 }
 
 :focus-visible {
   outline: 2px solid var(--color-teal);
   outline-offset: 2px;
+}
+
+/* --- reusable surfaces --------------------------------------------------- */
+
+/* Deep navy with a soft top-down glow — the calm, premium brand backdrop. */
+.surface-ink {
+  background:
+    radial-gradient(120% 90% at 50% -10%, #182a3d 0%, rgb(20 32 47 / 0) 60%),
+    linear-gradient(180deg, #0c1422 0%, #0a111d 100%);
+}
+
+/* Subtle teal aura, used behind hero marks / QR frames. */
+.aura-teal {
+  box-shadow: 0 0 0 1px rgb(127 233 216 / 0.12), 0 24px 60px -20px rgb(22 182 166 / 0.45);
+}
+
+/* Gentle entrance for cards/flashes. */
+@keyframes hp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: hp-rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Tidy thin scrollbars on the dashboards. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(12 20 34 / 0.18) transparent;
 }
 
 @media print {

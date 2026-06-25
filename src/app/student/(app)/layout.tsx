@@ -8,5 +8,5 @@ export default async function StudentLayout({
 }) {
   const session = await getStudentSession();
   if (!session) redirect("/student/login");
-  return <div className="flex min-h-screen flex-1 flex-col bg-ink">{children}</div>;
+  return <div className="flex min-h-screen flex-1 flex-col surface-ink">{children}</div>;
 }

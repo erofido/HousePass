@@ -262,7 +262,7 @@ export default function StationKiosk() {
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-ink text-paper"
+      className="flex min-h-screen flex-col surface-ink text-paper"
       onPointerDown={bump}
     >
       <header className="flex items-center justify-between px-6 py-4">
@@ -352,7 +352,7 @@ function IdleScreen({
         </p>
       </div>
 
-      <div className="rounded-3xl bg-white p-5">
+      <div className="rounded-3xl bg-white p-5 aura-teal">
         {code && offset !== null ? (
           <RotatingQr
             prefix="HPK:"

@@ -27,7 +27,7 @@ export default async function StaffLayout({
 
   if (!staff || !staff.active) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 bg-ink px-6 text-center text-paper">
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 surface-ink px-6 text-center text-paper">
         <BrandLockup dark />
         <h1 className="text-2xl font-semibold">No staff access</h1>
         <p className="max-w-sm text-paper/60">
