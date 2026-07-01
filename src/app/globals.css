@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@theme {
+  /* Lock In — midnight grind palette */
+  --color-bg: #0a0d12;
+  --color-bg-deep: #06080c;
+  --color-panel: #12161d;
+  --color-panel-2: #171d26;
+  --color-line: #222b38;
+  --color-txt: #e8eef5;
+  --color-mut: #8b98a9;
+  --color-acc: #a3e635; /* electric lime — progress, wins */
+  --color-acc-dim: #65821f;
+  --color-danger: #f87171;
+  --color-amber: #fbbf24;
+
+  --radius-xl2: 1.25rem;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-txt);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--color-acc);
+  color: var(--color-bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-acc);
+  outline-offset: 2px;
+}
+
+/* Soft lime glow behind hero elements. */
+.glow-acc {
+  box-shadow:
+    0 0 0 1px rgb(163 230 53 / 0.15),
+    0 20px 60px -20px rgb(163 230 53 / 0.35);
+}
+
+/* Gentle entrance for cards. */
+@keyframes li-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-rise {
+  animation: li-rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Pulsing timer dot. */
+@keyframes li-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.animate-pulse-dot {
+  animation: li-pulse 1.2s ease-in-out infinite;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(139 152 169 / 0.25) transparent;
+}

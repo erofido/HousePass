@@ -1,0 +1,8 @@
+/** Read a required environment variable, failing loudly if absent. */
+export function env(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}

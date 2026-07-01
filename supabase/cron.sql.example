@@ -1,0 +1,27 @@
+-- OPTIONAL alternative to the GitHub Actions scheduler: run the nag +
+-- summary jobs from Supabase itself (pg_cron + pg_net).
+--
+-- 1. Dashboard → Integrations → enable "Cron" (pg_cron) and pg_net.
+-- 2. Replace the two placeholders below, paste into the SQL editor, Run.
+
+select cron.schedule(
+  'lockin-nags',
+  '*/25 8-21 * * *',   -- every 25 min, 08:00–21:59 UTC (endpoint enforces UK quiet hours)
+  $$
+  select net.http_post(
+    url     := 'https://YOUR-APP.vercel.app/api/cron/nag',
+    headers := jsonb_build_object('Authorization', 'Bearer YOUR_CRON_SECRET')
+  );
+  $$
+);
+
+select cron.schedule(
+  'lockin-summary',
+  '30 19 * * *',       -- 19:30 UTC = 20:30 UK in summer
+  $$
+  select net.http_post(
+    url     := 'https://YOUR-APP.vercel.app/api/cron/summary',
+    headers := jsonb_build_object('Authorization', 'Bearer YOUR_CRON_SECRET')
+  );
+  $$
+);
