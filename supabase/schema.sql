@@ -79,6 +79,13 @@ create table public.achievements (
   unlocked_at  timestamptz not null default now()
 );
 
+-- Daily AI coach briefing cache (one row per day).
+create table public.coach_notes (
+  day         date primary key,
+  briefing    text not null,
+  created_at  timestamptz not null default now()
+);
+
 create table public.push_subscriptions (
   id          uuid primary key default gen_random_uuid(),
   endpoint    text not null unique,
@@ -95,6 +102,7 @@ alter table public.tasks               enable row level security;
 alter table public.sessions            enable row level security;
 alter table public.days                enable row level security;
 alter table public.achievements        enable row level security;
+alter table public.coach_notes         enable row level security;
 alter table public.push_subscriptions  enable row level security;
 
 revoke all on all tables in schema public from anon, authenticated;

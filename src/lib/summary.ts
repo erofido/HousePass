@@ -2,11 +2,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Core } from "@/lib/data";
 import { countdowns } from "@/lib/data";
 import { sendEmail } from "@/lib/mailer";
+import { coachVerdict } from "@/lib/coach";
 import { fmtDuration, localDateISO } from "@/lib/time";
 import { POINTS } from "@/lib/plan";
 
 /** The nightly report — same content whether it goes to Dad or to a test send. */
-export function buildDailySummary(core: Core): { subject: string; html: string } {
+export function buildDailySummary(
+  core: Core,
+  coachNote?: string | null,
+): { subject: string; html: string } {
   const { profile, todayMinutes, todayBySubject, streak, tasks } = core;
   const goal = profile.daily_goal_minutes;
   const ratio = goal > 0 ? todayMinutes / goal : 0;
@@ -100,6 +104,13 @@ export function buildDailySummary(core: Core): { subject: string; html: string }
         Mission: <strong>${POINTS.current} → ${POINTS.target} IB points</strong>
       </p>
 
+      ${
+        coachNote
+          ? `<h3 style="font-size:14px;margin:16px 0 4px;">Coach's verdict 🧠</h3>
+             <p style="margin:4px 0;font-size:14px;font-style:italic;color:#333;">${escapeHtml(coachNote)}</p>`
+          : ""
+      }
+
       <p style="font-size:11px;color:#999;margin-top:20px;">
         Sent automatically by Lock In, ${profile.name}'s study tracker.
       </p>
@@ -122,7 +133,15 @@ export async function sendDailySummary(
   );
   if (recipients.length === 0) return { sent: false, recipients, reason: "no_recipients" };
 
-  const { subject, html } = buildDailySummary(core);
+  const coachNote = await coachVerdict(core); // null when AI is unconfigured
+  const { subject, html } = buildDailySummary(core, coachNote);
   const result = await sendEmail(recipients, subject, html);
   return { ...result, recipients };
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
 }

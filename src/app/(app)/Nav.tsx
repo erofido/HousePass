@@ -7,6 +7,7 @@ import { cn } from "@/lib/cn";
 const TABS = [
   { href: "/", label: "Today", icon: "⚡" },
   { href: "/plan", label: "Plan", icon: "🗺️" },
+  { href: "/coach", label: "Coach", icon: "🧠" },
   { href: "/stats", label: "Stats", icon: "📈" },
   { href: "/arcade", label: "Arcade", icon: "🎮" },
   { href: "/settings", label: "Settings", icon: "⚙️" },

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLoad } from "@/hooks/useLoad";
 import { GoalRing } from "@/components/GoalRing";
 import { PushToggle } from "@/components/PushToggle";
+import { CoachCard } from "@/components/CoachCard";
 import { cn } from "@/lib/cn";
 import { fmtDuration } from "@/lib/time";
 import type { MePayload, Subject } from "@/lib/types";
@@ -188,6 +189,8 @@ export function DashboardClient() {
           </div>
         </div>
       </section>
+
+      <CoachCard />
 
       {/* Streak + level */}
       <section className="grid grid-cols-2 gap-2">

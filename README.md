@@ -34,12 +34,20 @@ It is deliberately annoying. That's the product.
 - **Vacation mode** — mark the 2–3 holiday weeks in Settings: streak
   protected, nags silenced, grind-day countdown adjusted.
 - **Installable PWA** — dark, phone-first, add to Home Screen.
+- **The Coach (AI)** — a Claude-powered coach that reads the *real* numbers
+  (minutes per subject, streak, neglected topics, what's left on the plan):
+  a daily briefing on the Today page with concrete marching orders, an
+  ask-anything **Coach** tab (plans, IB-specific explanations, quizzes,
+  reality checks), personalised nag notifications instead of canned ones,
+  and a "Coach's verdict" paragraph in Dad's nightly email. Optional —
+  everything falls back gracefully when no API key is set.
 
 ## Stack
 
 Next.js 16 (App Router) + TypeScript + Tailwind v4 · Supabase Postgres
 (service-role only, nothing client-side) · Web Push (free, no third party) ·
-Resend for email · Vercel hosting · GitHub Actions as the nag scheduler.
+Resend for email · Claude (Opus 4.8) for the Coach · Vercel hosting ·
+GitHub Actions as the nag scheduler.
 
 ## Setup (~15 minutes)
 
@@ -64,6 +72,15 @@ Pick a `STUDY_PASSCODE` (what you type to open the app).
 Create a free account at [resend.com](https://resend.com), make an API key.
 The default sender `Lock In <onboarding@resend.dev>` works immediately with
 no domain setup.
+
+### 3a. AI Coach (optional, recommended)
+
+Create an API key at [platform.claude.com](https://platform.claude.com) and
+set it as `ANTHROPIC_API_KEY`. That single variable switches on the daily
+briefing, the Coach tab, AI-written nags and the email verdict (model:
+Claude Opus 4.8 — at this usage it costs a few cents a day). If you ran
+`schema.sql` before the Coach existed, also run
+[`supabase/upgrade_ai.sql`](supabase/upgrade_ai.sql) once in the SQL editor.
 
 ### 4. Vercel
 

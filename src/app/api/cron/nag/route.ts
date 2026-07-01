@@ -3,6 +3,7 @@ import { requireCron } from "@/lib/api";
 import { createDb } from "@/lib/db";
 import { countdowns, loadCore } from "@/lib/data";
 import { nagGapMinutes, pickNag } from "@/lib/nags";
+import { coachNag } from "@/lib/coach";
 import { pushConfigured, pushToAllDevices } from "@/lib/push";
 import { localHour } from "@/lib/time";
 
@@ -61,6 +62,10 @@ export async function POST(request: Request) {
     streak: core.streak,
     nagCount,
   });
+
+  // The coach writes a fresh, personal one when configured; canned otherwise.
+  const aiBody = await coachNag(core, hour);
+  if (aiBody) nag.body = aiBody;
 
   const delivered = await pushToAllDevices(db, {
     ...nag,
